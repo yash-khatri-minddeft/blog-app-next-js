@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Blog {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  slug         String
+  excerpt      String?
+  content      String
+  categories   String[]
+  time         DateTime @default(now())
+  author       User     @relation(fields: [authorId], references: [id])
+  authorId     String   @db.ObjectId
+  thumbnailURI String
+
+  @@unique([slug])
+  @@index(fields: [id])
+}
+
+model Category {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String @unique
+  postCount Int    @default(0)
+}
+
+model User {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  email      String  @unique
+  password   String
+  isVerified Boolean @default(false)
+  isAdmin    Boolean @default(false)
+  Blog       Blog[]
+}
